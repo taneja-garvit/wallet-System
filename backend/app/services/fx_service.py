@@ -141,7 +141,6 @@ class FXService:
         return (converted_amount, rate)
     
     def is_currency_supported(self, currency: str) -> bool:
-        """Check if currency is supported"""
         try:
             Currency(currency)
             return True
@@ -149,7 +148,6 @@ class FXService:
             return False
     
     def get_supported_currencies(self) -> list[str]:
-        """Get list of all supported currencies"""
         return [c.value for c in Currency]
     
     def get_provider_name(self) -> str:

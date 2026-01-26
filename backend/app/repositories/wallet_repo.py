@@ -15,7 +15,7 @@ def create_wallet(db: Session, user_id: int, currency: str) -> Wallet:
 def get_wallet_by_user_id(db: Session, user_id: int) -> Optional[Wallet]:
     """
     Get wallet by user_id (no lock).
-    DEPRECATED: Use get_wallet_by_user_and_currency for multi-currency.
+    DEPRECATED: Used get_wallet_by_user_and_currency for multi-currency.
     Returns first wallet found (for backward compatibility).
     """
     return db.query(Wallet).filter(Wallet.user_id == user_id).first()
