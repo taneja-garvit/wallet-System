@@ -21,19 +21,28 @@ def transfer(
     idempotency_key: str = Depends(get_idempotency_key)
 ):
     """
-    Transfer money from current user to another user.
+    Transfer money from current user to another user with multi-currency support.
     
     Features:
+    - Multi-currency support with automatic FX conversion
     - Idempotent (same key = same result)
     - ACID guarantees
     - Deadlock prevention
     - Balance validation
+    - Immutable audit trail with FX metadata
+    
+    Interview line:
+    "Sender identity is derived from JWT, never from request payload."
+    "FX rate used for conversion is persisted with the transaction 
+     to ensure auditability and deterministic reconciliation."
     """
     try:
         result = transfer_money(
             db=db,
             sender_user_id=user_id,
             receiver_user_id=request.receiver_user_id,
+            source_currency=request.source_currency,
+            target_currency=request.target_currency,
             amount=request.amount,
             idempotency_key=idempotency_key
         )
@@ -54,7 +63,11 @@ def transfer(
         return TransferResponse(
             transaction_id=result["transaction_id"],
             status=result["status"],
-            amount=result["amount"]
+            source_amount=result["source_amount"],
+            source_currency=result["source_currency"],
+            target_amount=result["target_amount"],
+            target_currency=result["target_currency"],
+            fx_rate=result["fx_rate"]
         )
         
     except ValueError as e:
