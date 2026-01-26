@@ -8,31 +8,13 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Decode JWT to extract user_id
-  const decodeToken = (token) => {
-    try {
-      const payload = token.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      return decoded.sub ? parseInt(decoded.sub) : null;
-    } catch {
-      return null;
-    }
-  };
-
   useEffect(() => {
     // Check for stored token on mount
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     if (storedToken && storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      // If user object doesn't have id, decode from token
-      if (!parsedUser.id && storedToken) {
-        const userId = decodeToken(storedToken);
-        parsedUser.id = userId;
-        localStorage.setItem('user', JSON.stringify(parsedUser));
-      }
       setToken(storedToken);
-      setUser(parsedUser);
+      setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
@@ -42,13 +24,11 @@ export const AuthProvider = ({ children }) => {
       const data = await apiLogin(email, password);
       const { access_token } = data;
       
-      const userId = decodeToken(access_token);
-      
       localStorage.setItem('token', access_token);
-      localStorage.setItem('user', JSON.stringify({ email, id: userId }));
+      localStorage.setItem('user', JSON.stringify({ email }));
       
       setToken(access_token);
-      setUser({ email, id: userId });
+      setUser({ email });
       
       return { success: true };
     } catch (error) {
