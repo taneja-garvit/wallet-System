@@ -1,5 +1,3 @@
-from passlib.context import CryptContext
-from jose import jwt
-from datetime import datetime, timedelta
+from sqlalchemy.ext.declarative import declarative_base
 
-from app.core.config import JWT_SECRET, JWT_EXPIRE_MINUTES
+Base = declarative_base()
