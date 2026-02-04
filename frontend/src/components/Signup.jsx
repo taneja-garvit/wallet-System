@@ -60,8 +60,8 @@ const Signup = ({ onSwitch }) => {
           
           <div className="grid grid-cols-2 gap-6 mb-8">
             <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-4">
-              <p className="text-3xl font-bold mb-1">6</p>
-              <p className="text-purple-100 text-sm">Currencies</p>
+              <p className="text-3xl font-bold mb-1">1</p>
+              <p className="text-purple-100 text-sm">Currency</p>
             </div>
             <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-xl p-4">
               <p className="text-3xl font-bold mb-1">0.1s</p>

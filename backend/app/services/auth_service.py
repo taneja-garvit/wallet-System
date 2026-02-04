@@ -1,24 +1,20 @@
 from sqlalchemy.orm import Session
 from app.repositories.user_repo import get_user_by_email, create_user
+from app.repositories.wallet_repo import create_wallet
 from app.core.security import hash_password, verify_password, create_access_token
 
 def signup(db: Session, name: str, email: str, password: str):
     """
-    Create user account.
-    
-    Note: Wallets are NOT automatically created.
-    Users must explicitly create wallets for desired currencies via POST /wallets.
-    
-    This design allows:
-    - Users to choose which currencies they need
-    - Clean separation of user identity and financial accounts
-    - Flexibility in wallet management
+    Create user and wallet atomically.
+    Wallet is auto-created with default name based on user's name.
     """
     if get_user_by_email(db, email):
         raise ValueError("User already exists")
 
     try:
         user = create_user(db, name, email, hash_password(password))
+        # Auto-create wallet with personalized name
+        create_wallet(db, user.id, name=f"{name}'s Wallet")
         db.commit()
     except Exception:
         db.rollback()

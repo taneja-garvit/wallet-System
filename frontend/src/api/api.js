@@ -38,32 +38,24 @@ export const login = async (email, password) => {
   return response.data;
 };
 
-// Wallet APIs
-export const createWallet = async (currency) => {
-  const response = await api.post('/wallets', { currency });
-  return response.data;
-};
-
-export const getWallets = async () => {
-  const response = await api.get('/wallets');
-  return response.data;
-};
-
-// Legacy - deprecated
+// Wallet APIs (Single currency: INR)
 export const getWallet = async () => {
-  const response = await api.get('/wallets');
+  const response = await api.get('/wallet');
   return response.data;
 };
 
-// Transaction APIs
-export const transferMoney = async (receiverUserId, sourceCurrency, targetCurrency, amount) => {
+export const updateWalletName = async (name) => {
+  const response = await api.patch('/wallet/name', { name });
+  return response.data;
+};
+
+// Transaction APIs (Single currency: INR)
+export const transferMoney = async (receiverUserId, amount) => {
   const idempotencyKey = generateUUID(); // Auto-generate UUID!
   const response = await api.post(
     '/transactions/transfer',
     { 
       receiver_user_id: receiverUserId,
-      source_currency: sourceCurrency,
-      target_currency: targetCurrency,
       amount 
     },
     { headers: { 'Idempotency-Key': idempotencyKey } }
@@ -79,4 +71,3 @@ export const getTransactions = async (limit = 20, cursor = null) => {
 };
 
 export default api;
-

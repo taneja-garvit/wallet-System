@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, wallet, transactions
 
 app = FastAPI(
-    title="Multi-Currency Wallet System",
-    description="Wallet system with multi-currency support and FX conversion",
-    version="2.0.0"
+    title="Wallet System",
+    description="Digital wallet system with INR currency",
+    version="3.0.0"
 )
 
 # Enable CORS for frontend
@@ -28,4 +28,4 @@ app.include_router(transactions.router)
 @app.get("/health")
 def health_check():
     """Health check endpoint"""
-    return {"status": "healthy", "version": "2.0.0"}
+    return {"status": "healthy", "version": "3.0.0", "currency": "INR"}

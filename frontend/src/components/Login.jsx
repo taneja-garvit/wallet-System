@@ -42,12 +42,12 @@ const Login = ({ onSwitch }) => {
               Multi-Currency<br />Wallet System
             </h1>
             <p className="text-xl text-purple-100 mb-8">
-              Send and receive money across 6 currencies with instant FX conversion
+              Send and receive money instantly
             </p>
           </div>
           
           <div className="space-y-4">
-            <div className="flex items-start space-x-3">
+            {/* <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center mt-0.5">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -57,7 +57,7 @@ const Login = ({ onSwitch }) => {
                 <p className="text-white font-medium">Instant FX Conversion</p>
                 <p className="text-purple-200 text-sm">Real-time currency exchange across USD, EUR, GBP, INR, JPY, AUD</p>
               </div>
-            </div>
+            </div> */}
             
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center mt-0.5">

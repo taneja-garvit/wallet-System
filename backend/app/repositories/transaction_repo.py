@@ -15,36 +15,15 @@ def create_transaction(
     idempotency_key: str,
     sender_wallet_id: int,
     receiver_wallet_id: int,
-    source_currency: str,
-    target_currency: str,
-    source_amount: Decimal,
-    target_amount: Decimal,
-    fx_rate: Decimal,
-    fx_provider: str,
-    fx_timestamp: datetime,
+    amount: Decimal,
     status: str
 ) -> Transaction:
-    """
-    Create a new transaction record with FX metadata.
-    
-    All FX fields are required for audit trail:
-    - fx_rate: Exchange rate used for conversion
-    - fx_provider: Source of exchange rate (e.g., "STATIC")
-    - fx_timestamp: When the rate was obtained
-    
-    This ensures deterministic reconciliation and auditability.
-    """
+    """Create a new transaction record. Single currency (INR)."""
     transaction = Transaction(
         idempotency_key=idempotency_key,
         sender_wallet_id=sender_wallet_id,
         receiver_wallet_id=receiver_wallet_id,
-        source_currency=source_currency,
-        target_currency=target_currency,
-        source_amount=source_amount,
-        target_amount=target_amount,
-        fx_rate=fx_rate,
-        fx_provider=fx_provider,
-        fx_timestamp=fx_timestamp,
+        amount=amount,
         status=status
     )
     db.add(transaction)
@@ -53,25 +32,19 @@ def create_transaction(
 
 def get_user_transactions(
     db: Session,
-    wallet_ids: List[int],  # Changed to support multiple wallets per user
+    wallet_id: int,  # Single wallet per user
     limit: int,
     cursor_created_at: Optional[datetime] = None,
     cursor_id: Optional[int] = None
 ) -> list[Transaction]:
     """
-    Get transactions for user's wallets with cursor pagination.
-    Returns transactions where any of the user's wallets is sender or receiver.
-    
-    Args:
-        wallet_ids: List of wallet IDs for the user (across all currencies)
-        limit: Max number of transactions to return
-        cursor_created_at: Cursor timestamp for pagination
-        cursor_id: Cursor ID for pagination
+    Get transactions for user's wallet with cursor pagination.
+    Returns transactions where wallet is sender or receiver.
     """
     query = db.query(Transaction).filter(
         or_(
-            Transaction.sender_wallet_id.in_(wallet_ids),
-            Transaction.receiver_wallet_id.in_(wallet_ids)
+            Transaction.sender_wallet_id == wallet_id,
+            Transaction.receiver_wallet_id == wallet_id
         )
     )
     

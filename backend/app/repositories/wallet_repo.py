@@ -1,42 +1,28 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from typing import Optional, List
+from typing import Optional
 from app.models.wallet import Wallet
 
-def create_wallet(db: Session, user_id: int, currency: str) -> Wallet:
+def create_wallet(db: Session, user_id: int, name: str = "My Wallet") -> Wallet:
     """
-    Create a new wallet for a user in the specified currency.
-    Enforces: one wallet per currency per user.
+    Create a new wallet for a user.
+    Single currency system (INR).
     """
-    wallet = Wallet(user_id=user_id, currency=currency, balance=0)
+    wallet = Wallet(user_id=user_id, name=name, balance=0)
     db.add(wallet)
     return wallet
 
 def get_wallet_by_user_id(db: Session, user_id: int) -> Optional[Wallet]:
-    """
-    Get wallet by user_id (no lock).
-    DEPRECATED: Used get_wallet_by_user_and_currency for multi-currency.
-    Returns first wallet found (for backward compatibility).
-    """
+    """Get wallet by user_id (no lock). One wallet per user."""
     return db.query(Wallet).filter(Wallet.user_id == user_id).first()
 
-def get_wallet_by_user_and_currency(
-    db: Session, 
-    user_id: int, 
-    currency: str
-) -> Optional[Wallet]:
-    """
-    Get wallet by user_id and currency (no lock).
-    This is the primary lookup method for multi-currency wallets.
-    """
-    return db.query(Wallet).filter(
-        Wallet.user_id == user_id,
-        Wallet.currency == currency
-    ).first()
-
-def get_all_wallets_by_user(db: Session, user_id: int) -> List[Wallet]:
-    """Get all wallets for a user (across all currencies)"""
-    return db.query(Wallet).filter(Wallet.user_id == user_id).order_by(Wallet.currency).all()
+def update_wallet_name(db: Session, wallet_id: int, name: str) -> Wallet:
+    """Update wallet name"""
+    wallet = db.query(Wallet).filter(Wallet.id == wallet_id).first()
+    if wallet:
+        wallet.name = name
+        db.flush()
+    return wallet
 
 def lock_wallet(db: Session, wallet_id: int) -> Wallet:
     """Lock wallet row for update (deadlock prevention)"""

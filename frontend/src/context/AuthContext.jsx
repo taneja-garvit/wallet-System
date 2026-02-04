@@ -62,8 +62,15 @@ export const AuthProvider = ({ children }) => {
   const signup = async (name, email, password) => {
     try {
       await apiSignup(name, email, password);
-      // Auto-login after signup
-      return await login(email, password);
+      // Auto-login after signup and store name
+      const result = await login(email, password);
+      if (result.success) {
+        // Add name to user data
+        const updatedUser = { ...user, name, email };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+      }
+      return result;
     } catch (error) {
       return {
         success: false,
