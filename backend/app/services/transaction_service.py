@@ -3,7 +3,8 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 from typing import Optional
 from decimal import Decimal
 
-from app.repositories.wallet_repo import get_wallet_by_user_id, lock_wallets_ordered
+
+from app.repositories.wallet_repo import get_wallet_by_user_id, lock_wallets_ordered_by_user_id
 from app.repositories.transaction_repo import (
     get_transaction_by_idempotency_key,
     create_transaction,
@@ -74,25 +75,22 @@ def transfer_money(
     if sender_user_id == receiver_user_id:
         raise ValueError("Cannot transfer to yourself")
     
-    # Step 3: Get wallets
-    sender_wallet = get_wallet_by_user_id(db, sender_user_id)
-    receiver_wallet = get_wallet_by_user_id(db, receiver_user_id)
-    
-    if not sender_wallet:
-        raise ValueError("Sender wallet not found")
-    if not receiver_wallet:
-        raise ValueError("Receiver wallet not found")
-    
-    sender_wallet_id = sender_wallet.id
-    receiver_wallet_id = receiver_wallet.id
     amount_decimal = Decimal(str(amount))
     
-    # Step 4: Start DB transaction (everything below is atomic)
+    # Step 3: Start DB transaction (everything below is atomic)
     try:
-        # Step 5: Lock wallets in deterministic order (deadlock prevention)
-        sender_wallet_locked, receiver_wallet_locked = lock_wallets_ordered(
-            db, sender_wallet_id, receiver_wallet_id
+        # Step 4: Lock wallets in deterministic order (deadlock prevention & fetch in one query)
+        sender_wallet_locked, receiver_wallet_locked = lock_wallets_ordered_by_user_id(
+            db, sender_user_id, receiver_user_id
         )
+        
+        if not sender_wallet_locked:
+            raise ValueError("Sender wallet not found")
+        if not receiver_wallet_locked:
+            raise ValueError("Receiver wallet not found")
+            
+        sender_wallet_id = sender_wallet_locked.id
+        receiver_wallet_id = receiver_wallet_locked.id
         
         # Step 6: Balance check (fail early)
         if sender_wallet_locked.balance < amount_decimal:

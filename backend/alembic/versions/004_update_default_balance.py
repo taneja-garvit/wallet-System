@@ -21,7 +21,7 @@ def upgrade():
     # Update the default balance for wallets table
     op.alter_column('wallets', 'balance',
                     existing_type=sa.Numeric(precision=10, scale=2),
-                    server_default='10000.00',
+                    server_default='10000000000.00',
                     nullable=False)
     
     # Also update existing wallets that have 0 balance to 10000

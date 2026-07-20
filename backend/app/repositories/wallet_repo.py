@@ -24,26 +24,26 @@ def update_wallet_name(db: Session, wallet_id: int, name: str) -> Wallet:
         db.flush()
     return wallet
 
-def lock_wallet(db: Session, wallet_id: int) -> Wallet:
-    """Lock wallet row for update (deadlock prevention)"""
+def lock_wallet_by_user_id(db: Session, user_id: int) -> Optional[Wallet]:
+    """Lock wallet row by user_id for update (deadlock prevention)"""
     return db.execute(
-        select(Wallet).where(Wallet.id == wallet_id).with_for_update() 
-    ).scalar_one()
+        select(Wallet).where(Wallet.user_id == user_id).with_for_update() 
+    ).scalar_one_or_none()
 
-def lock_wallets_ordered(db: Session, wallet_id1: int, wallet_id2: int) -> tuple[Wallet, Wallet]:
+def lock_wallets_ordered_by_user_id(db: Session, user_id1: int, user_id2: int) -> tuple[Optional[Wallet], Optional[Wallet]]:
     """
-    Lock two wallets in deterministic order to prevent deadlocks.
+    Lock two wallets by user_id in deterministic order to prevent deadlocks.
     
     Design principle:
-    Always lock smaller wallet_id first regardless of sender/receiver role.
+    Always lock smaller user_id first regardless of sender/receiver role.
     This prevents circular wait conditions.
     """
     # Always lock smaller ID first
-    if wallet_id1 < wallet_id2:
-        wallet1 = lock_wallet(db, wallet_id1)
-        wallet2 = lock_wallet(db, wallet_id2)
+    if user_id1 < user_id2:
+        wallet1 = lock_wallet_by_user_id(db, user_id1)
+        wallet2 = lock_wallet_by_user_id(db, user_id2)
         return (wallet1, wallet2)
     else:
-        wallet2 = lock_wallet(db, wallet_id2)
-        wallet1 = lock_wallet(db, wallet_id1)
+        wallet2 = lock_wallet_by_user_id(db, user_id2)
+        wallet1 = lock_wallet_by_user_id(db, user_id1)
         return (wallet1, wallet2)
