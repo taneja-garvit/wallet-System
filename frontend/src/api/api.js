@@ -20,11 +20,7 @@ api.interceptors.request.use((config) => {
 
 // Generate UUID for idempotency keys
 export const generateUUID = () => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+  return crypto.randomUUID();
 };
 
 // Auth APIs
@@ -50,15 +46,15 @@ export const updateWalletName = async (name) => {
 };
 
 // Transaction APIs (Single currency: INR)
-export const transferMoney = async (receiverUserId, amount) => {
-  const idempotencyKey = generateUUID(); // Auto-generate UUID!
+export const transferMoney = async (receiverUserId, amount, idempotencyKey = null) => {
+  const key = idempotencyKey || generateUUID();
   const response = await api.post(
     '/transactions/transfer',
     { 
       receiver_user_id: receiverUserId,
       amount 
     },
-    { headers: { 'Idempotency-Key': idempotencyKey } }
+    { headers: { 'Idempotency-Key': key } }
   );
   return response.data;
 };

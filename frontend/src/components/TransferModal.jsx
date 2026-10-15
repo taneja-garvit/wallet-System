@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { transferMoney } from '../api/api';
+import { transferMoney, generateUUID } from '../api/api';
 
 const TransferModal = ({ onClose, onSuccess, currentBalance }) => {
   const [receiverId, setReceiverId] = useState('');
@@ -7,6 +7,7 @@ const TransferModal = ({ onClose, onSuccess, currentBalance }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [idempotencyKey, setIdempotencyKey] = useState(() => generateUUID());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,9 +34,10 @@ const TransferModal = ({ onClose, onSuccess, currentBalance }) => {
     setLoading(true);
 
     try {
-      const result = await transferMoney(parseInt(receiverId), amountNum);
+      const result = await transferMoney(parseInt(receiverId), amountNum, idempotencyKey);
       
       if (result.status === 'SUCCESS') {
+        setIdempotencyKey(generateUUID());
         setSuccess(`✨ Successfully sent ₹${amountNum.toFixed(2)}!`);
         setTimeout(() => {
           onSuccess();
@@ -120,7 +122,10 @@ const TransferModal = ({ onClose, onSuccess, currentBalance }) => {
                     type="number"
                     required
                     value={receiverId}
-                    onChange={(e) => setReceiverId(e.target.value)}
+                    onChange={(e) => {
+                      setReceiverId(e.target.value);
+                      setIdempotencyKey(generateUUID());
+                    }}
                     className="w-full px-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none font-medium text-slate-900"
                     placeholder="Enter user ID (e.g., 2)"
                     disabled={loading}
@@ -148,7 +153,10 @@ const TransferModal = ({ onClose, onSuccess, currentBalance }) => {
                     step="0.01"
                     required
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) => {
+                      setAmount(e.target.value);
+                      setIdempotencyKey(generateUUID());
+                    }}
                     className="w-full pl-10 pr-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:bg-white focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-lg font-semibold text-slate-900"
                     placeholder="0.00"
                     disabled={loading}

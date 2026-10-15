@@ -24,11 +24,10 @@ export const options = {
     },
 };
 
-const TEST_USERS = [
-    { email: 'email', password: 'password' },
-    // in this format
-    
-];
+const TEST_USERS = Array.from({ length: 50 }, (_, i) => ({
+    email: `alice@example${i + 1}.com`,
+    password: 'password123',
+}));
 
 function decodeUserId(token) {
     const payload = token.split('.')[1];
